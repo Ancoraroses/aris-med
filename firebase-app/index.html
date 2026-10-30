@@ -351,9 +351,9 @@ async function regSend(){
       const dup=SH.status==='given'&&!SH.force?S.logs.find(l=>l.medId===m.id&&l.status==='given'&&l.at&&Math.abs(new Date(l.at)-c.actual)<10*MIN):null;
       if(dup)r={ok:false,code:'dup',log:dup};else{await db.doc('logs/'+m.id+'_m'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)).set(body);r={ok:true}}}
     SH.busy=false;
-    if(r.ok){closeSheet();toast(SH.status==='given'?'Toma enviada. Consta como administrada al confirmarla el servidor.':'Omisión enviada.');return}
+    if(r.ok){const g=SH.status==='given';closeSheet();toast(g?'Toma registrada.':'Omisión registrada.');return}
     SH.res=r;drawReg()
-  }catch(e){SH.busy=false;SH.res={ok:false,code:'error',msg:errMsg(e)};drawReg()}}
+  }catch(e){if(!SH){toast('No se pudo registrar: '+errMsg(e));return}SH.busy=false;SH.res={ok:false,code:'error',msg:errMsg(e)};drawReg()}}
 
 function openLog(id){const l=S.logs.find(x=>x.id===id);if(!l)return;SH={kind:'log',id,edit:false,when:l.at?`${lDate(new Date(l.at))}T${lTime(new Date(l.at))}`:`${l.approx||lDate(new Date())}T12:00`,dose:l.dose,notes:l.notes||'',status:l.status==='voided'?'given':l.status,confirmed:l.confirmed!==false&&l.status!=='pending_confirm',reason:'',err:null,busy:false};drawLog()}
 function drawLog(){
