@@ -123,6 +123,8 @@ async function seedIfEmpty(){
   await b.commit()}
 const ADJ={adjust:['2026-10-30T21:45:00.000Z','2026-10-31T05:30:00.000Z','2026-10-31T13:15:00.000Z','2026-10-31T21:00:00.000Z'],adjustNote:'Ajuste acordado con farmacia/pediatría (confirmado por la familia): intervalos de 7 h 45 min desde la última toma real (30/10 a las 15:00) hasta volver a 22:00 / 06:00 / 14:00. Nunca se muestra una toma con menos de 7 h 45 min desde la anterior.'};
 async function applyAdjust(){const r=doc(fs,'meds/augmentine'),s=await getDoc(r);if(s.exists()&&!('adjust' in s.data()))await updateDoc(r,ADJ)}
+const COND='Solo si hay fiebre superior a 39 °C (indicado por la familia; verificar con pediatría)';
+async function applyCond(){for(const id of ['dalsy','apiretal']){const r=doc(fs,'meds/'+id),s=await getDoc(r);if(s.exists()&&!('condition' in s.data()))await updateDoc(r,{condition:COND})}}
 const out=()=>signOut(auth);
 function loginView(msg){show('<h1>Aris Med</h1><div class="muted">Registro familiar de medicación.<br>Entra con tu cuenta de Google.</div>'+(msg?'<div class="alert bad">'+msg+'</div>':'')+'<button class="btn" id="gl">Entrar con Google</button>');
   document.getElementById('gl').onclick=async()=>{try{await signInWithPopup(auth,new GoogleAuthProvider())}catch(e){if(e.code!=='auth/popup-closed-by-user'&&e.code!=='auth/cancelled-popup-request')loginView('No se pudo iniciar sesión ('+(e.code||'error')+').')}}}
@@ -131,7 +133,7 @@ onAuthStateChanged(auth,async u=>{
   if(!u){loginView();return}
   const email=(u.email||'').toLowerCase(),key=ALLOWED[email];
   if(!key||!u.emailVerified){errView('Esta cuenta no tiene acceso',email);return}
-  try{await seedIfEmpty();await applyAdjust()}catch(e){errView('No se pudo preparar la base de datos',e.code||'error');return}
+  try{await seedIfEmpty();await applyAdjust();await applyCond()}catch(e){errView('No se pudo preparar la base de datos',e.code||'error');return}
   lg.classList.remove('on');
   const db=mkDb();
   window.__aris={signOut:out,email};
@@ -236,7 +238,7 @@ function vHome(){
     const byI=m.mode==='manual'&&la&&m.intervalH?new Date(+la+m.intervalH*HOUR):null;
     const nxt=nx?`<dt>Próxima</dt><dd>${esc(fmtDT(nx.s))}${dueS?' · <b style="color:var(--bad)">retrasada</b>':''}</dd>`:byI?`<dt>No antes de</dt><dd>${fmtDT(byI)}</dd>`:'';
     return`<div class="card"><div class="med">${esc(m.name)}</div>
-    <div><span class="dose">${esc(m.dose)}</span> <span class="muted">· ${esc(m.freq.replace(', según receta',''))}</span></div>
+    <div><span class="dose">${esc(m.dose)}</span> <span class="muted">· ${esc(m.freq.replace(', según receta',''))}</span></div>${m.condition?`<div class="alert warn" style="padding:6px 10px;margin-top:6px"><b>${esc(m.condition)}</b></div>`:''}
     <dl class="kv"><dt>Última toma</dt><dd>${lg?esc(fmtDT(lg.at)+' · '+nick(lg.byId)):pcl?'hora por confirmar':'sin registros'}</dd>${nxt}<dt>Día</dt><dd>${td.state==='not_started'?'empieza '+m.startDate.split('-').reverse().join('/'):td.state==='finished'?'cumplido':td.day+(td.total?' de '+td.total:'')}</dd></dl>
     ${rw()?`<button class="btn ${dueS?'gold':''}" style="margin-top:10px" data-act="reg" data-med="${esc(m.id)}"${nx&&nx.s?` data-slot="${nx.s.getTime()}"`:''}>Registrar toma</button>`:''}</div>`}).join('');
   return`<header class="hero pad"><div class="kick">Medicación de</div><h1>${esc(S.cfg.child)}</h1><div class="clock">${esc(fmtLong(now))}</div>
@@ -259,7 +261,7 @@ function vMeds(){
   return`<div class="st" style="margin-top:10px">Pautas</div>
   <div class="alert info">Datos de la receta del 29/10/2026 introducidos por la familia: <b>verifícalos con pediatría o farmacia</b>. La app no calcula ni cambia dosis (peso informado: ${esc(S.cfg.weight??'—')} kg, solo informativo).</div>
   ${S.meds.map(m=>{const td=tDays(m,S.now),en=mEnd(m),gw=gapWarn(m);return`<div class="card" style="${m.active?'':'opacity:.6'}"><div class="row between"><div class="med">${esc(mTitle(m))}</div><span class="chip ${m.verified?'given':'warn'}">${m.verified?'verificada':'sin verificar'}</span></div>
-  <dl class="kv"><dt>Dosis</dt><dd>${esc(m.dose)}</dd><dt>Frecuencia</dt><dd>${esc(m.freq)}</dd><dt>Horario</dt><dd>${m.mode==='scheduled'?([...m.times].sort().join(' · ')+(isRolling(m)?' (se reajusta)':'')):'manual'}</dd><dt>Inicio</dt><dd>${m.startDate.split('-').reverse().join('/')}${m.startTime?' '+m.startTime.slice(0,5):''}</dd><dt>Duración</dt><dd>${m.days?m.days+' días':'—'}</dd>${(m.adjust||[]).length?`<dt>Ajuste de horario</dt><dd>${m.adjust.map(x=>esc(fmtDT(x))).join(' → ')}</dd>`:''}</dl>${m.adjustNote?`<div class="muted" style="margin-top:6px">${esc(m.adjustNote)}</div>`:''}
+  <dl class="kv"><dt>Dosis</dt><dd>${esc(m.dose)}</dd><dt>Frecuencia</dt><dd>${esc(m.freq)}</dd><dt>Horario</dt><dd>${m.mode==='scheduled'?([...m.times].sort().join(' · ')+(isRolling(m)?' (se reajusta)':'')):'manual'}</dd><dt>Inicio</dt><dd>${m.startDate.split('-').reverse().join('/')}${m.startTime?' '+m.startTime.slice(0,5):''}</dd><dt>Duración</dt><dd>${m.days?m.days+' días':'—'}</dd>${m.condition?`<dt>Cuándo</dt><dd>${esc(m.condition)}</dd>`:''}${(m.adjust||[]).length?`<dt>Ajuste de horario</dt><dd>${m.adjust.map(x=>esc(fmtDT(x))).join(' → ')}</dd>`:''}</dl>${m.adjustNote?`<div class="muted" style="margin-top:6px">${esc(m.adjustNote)}</div>`:''}
   ${gw.map(g=>`<div class="alert warn" style="margin-top:8px">${g.from} → ${g.to}: ${fmtDur(g.hours*60)} (pauta: ${fmtDur(g.expected*60)})</div>`).join('')}
   ${m.notes?`<div class="muted" style="margin-top:6px">${esc(m.notes)}</div>`:''}
   ${rw()?`<button class="btn ghost sm" style="margin-top:10px;width:100%" data-act="medit" data-id="${esc(m.id)}">Editar / verificar</button>`:''}</div>`}).join('')||'<div class="card empty muted">Sin medicación cargada.</div>'}
@@ -304,7 +306,7 @@ function drawReg(){
   if(SH.step==='confirm'){sheet(`${head('Confirmar registro')}<div class="card"><div class="med">${esc(mTitle(m))}</div><div class="dose">${esc(m.dose)}</div><dl class="kv"><dt>Estado</dt><dd>${SH.status==='given'?'Administrada':'NO administrada (omitida)'}</dd><dt>Hora real</dt><dd>${esc(fmtDT(c.actual))}</dd>${c.slot?`<dt>Horario previsto</dt><dd>${lTime(c.slot)}</dd>`:''}<dt>Persona</dt><dd>${esc(nick(SH.by))}</dd>${SH.notes.trim()?`<dt>Observaciones</dt><dd>${esc(SH.notes.trim())}</dd>`:''}</dl></div>${c.w.map(x=>`<div class="alert warn">${esc(x)}</div>`).join('')}<div class="muted">Constará como «Administrada» solo cuando el servidor confirme el registro.</div><button class="btn gold" data-act="regsend" ${SH.busy?'disabled':''}>${SH.busy?'Enviando…':SH.status==='given'?'Confirmar: la he administrado':'Confirmar: no administrada'}</button><button class="btn ghost" data-act="regback" ${SH.busy?'disabled':''}>Volver y editar</button>`);return}
   const slots=plan(m,new Date(Date.now()-24*HOUR),new Date(Date.now()+14*HOUR),logsMap()).filter(x=>!x.lg||x.s.getTime()===SH.slotMs).map(x=>x.s);
   sheet(`${head('Registrar toma')}<label class="f">Medicamento<select class="input" data-f="medId" data-redraw="1">${S.meds.filter(x=>x.active).map(x=>opt(x.id,x.name,x.id===SH.medId)).join('')}</select></label>
-  <div class="muted">Dosis de la pauta: <b class="dose" style="font-size:18px">${esc(m.dose)}</b> · ${esc(m.freq)}${m.verified?'':' · sin verificar'}</div>
+  <div class="muted">Dosis de la pauta: <b class="dose" style="font-size:18px">${esc(m.dose)}</b> · ${esc(m.freq)}${m.verified?'':' · sin verificar'}</div>${m.condition?`<div class="alert warn"><b>${esc(m.condition)}</b></div>`:''}
   <div class="seg"><button class="${SH.status==='given'?'on':''}" data-act="st" data-v="given">Administrada</button><button class="${SH.status==='skipped'?'on':''}" data-act="st" data-v="skipped">No administrada</button></div>
   ${m.mode==='scheduled'?`<label class="f">Horario previsto<select class="input" data-f="slotMs" data-redraw="1"><option value="">Sin horario previsto</option>${slots.map(s=>opt(s.getTime(),fmtDT(s),s.getTime()===SH.slotMs)).join('')}</select></label>`:''}
   ${c.taken?`<div class="alert bad"><strong>Esta toma ya está registrada</strong>${esc(nick(c.taken.byId))} · ${esc(fmtDT(c.taken.at))}</div>`:''}
