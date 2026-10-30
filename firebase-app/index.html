@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Aris Med</title>
+<meta name="theme-color" content="#1c3454"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Newsreader:opsz,wght@6..72,500;6..72,700&display=swap">
+</head><body>
+<style>
+/* Layout: una columna de móvil, cabecera azul marino con la niña, tarjetas claras, barra inferior de 4 pestañas. */
+:root{
+  --bg:#f5f0e6; --surface:#fffdf8; --fg:#16283f; --navy:#1c3454; --gold:#e0bd7c; --line:#e4dccb; --muted:#566579;
+  --hero-bg:#1c3454; --hero-fg:#fff; --btn-bg:#1c3454; --btn-fg:#fff; --gold-btn-fg:#16283f;
+  --ok:#2a7347; --ok-bg:#dff2e6; --warn:#8a5212; --warn-bg:#fff0d3; --warn-line:#efcf9a; --bad:#a1302b; --bad-bg:#fde7e4; --bad-line:#f0b9b3;
+  --info-bg:#e8eef7; --info-line:#c9d6ea; --conf:#5e3a92; --conf-bg:#efe3fb; --tab-bg:#1c3454; --tab-fg:#b9c6d8; --tab-on-bg:#e0bd7c; --tab-on-fg:#16283f;
+  --display:'Newsreader',Georgia,serif; --body:'Atkinson Hyperlegible',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f1b2c; --surface:#1a2f4a; --fg:#f1ece0; --navy:#e0bd7c; --line:#2d4666; --muted:#9fb0c4;
+  --hero-bg:#16283f; --hero-fg:#fff; --btn-bg:#e0bd7c; --btn-fg:#16283f; --gold-btn-fg:#16283f;
+  --ok:#7fd3a0; --ok-bg:#1d4a33; --warn:#f2c982; --warn-bg:#4a3512; --warn-line:#6b4d1d; --bad:#ff9d96; --bad-bg:#53201d; --bad-line:#7b3330;
+  --info-bg:#203a5c; --info-line:#2f5079; --conf:#cdb0f2; --conf-bg:#3b2a57; --tab-bg:#16283f; --tab-fg:#9fb0c4; --tab-on-bg:#e0bd7c; --tab-on-fg:#16283f; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1b2c; --surface:#1a2f4a; --fg:#f1ece0; --navy:#e0bd7c; --line:#2d4666; --muted:#9fb0c4;
+  --hero-bg:#16283f; --hero-fg:#fff; --btn-bg:#e0bd7c; --btn-fg:#16283f; --gold-btn-fg:#16283f;
+  --ok:#7fd3a0; --ok-bg:#1d4a33; --warn:#f2c982; --warn-bg:#4a3512; --warn-line:#6b4d1d; --bad:#ff9d96; --bad-bg:#53201d; --bad-line:#7b3330;
+  --info-bg:#203a5c; --info-line:#2f5079; --conf:#cdb0f2; --conf-bg:#3b2a57; --tab-bg:#16283f; --tab-fg:#9fb0c4; --tab-on-bg:#e0bd7c; --tab-on-fg:#16283f; color-scheme:dark}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.35}
+button,input,select,textarea{font:inherit;color:inherit}
+h1,h2,h3{margin:0}
+.wrap{max-width:560px;margin:0 auto;padding-bottom:calc(88px + env(safe-area-inset-bottom,0px))}
+.pad{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.disc{background:#16283f;color:#e0bd7c;font-size:11.5px;text-align:center;padding-block:5px}
+.hero{background:var(--hero-bg);color:var(--hero-fg);padding-block:14px 16px;border-radius:0 0 22px 22px}
+.kick{color:#e0bd7c;font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:700}
+.hero h1{font-family:var(--display);font-size:30px;font-weight:700;line-height:1.1;margin-top:1px}
+.clock{margin-top:2px;font-size:14px;opacity:.92;text-transform:capitalize}
+.sync{margin-top:6px;font-size:12px;display:flex;gap:8px;align-items:center;opacity:.9}
+.dot{width:9px;height:9px;border-radius:50%;background:#6fcf97;display:inline-block}.dot.off{background:#f2994a}.dot.err{background:#eb5757}
+.page{display:grid;gap:12px;padding-block:14px 8px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px;min-width:0}
+.card h2,.sheet h2{font-family:var(--display);font-size:19px;color:var(--navy)}
+.st{font-size:12px;font-weight:700;color:var(--navy);letter-spacing:.04em;text-transform:uppercase;margin:6px 4px 0}
+.muted{color:var(--muted);font-size:13px}
+.row{display:flex;align-items:center;gap:10px}.row.between{justify-content:space-between;align-items:flex-start}.row>*{min-width:0}
+.stack{display:grid;gap:10px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 16px;border-radius:12px;border:0;cursor:pointer;background:var(--btn-bg);color:var(--btn-fg);font-weight:700;font-size:16px;width:100%}
+.btn.gold{background:#e0bd7c;color:var(--gold-btn-fg)}
+.btn.ghost{background:transparent;color:var(--navy);border:1.5px solid var(--navy)}
+.btn.danger{background:var(--bad);color:#fff}
+.btn.sm{min-height:40px;font-size:14px;width:auto;padding:0 14px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn:focus-visible,.input:focus-visible,.tab:focus-visible{outline:3px solid #e0bd7c;outline-offset:2px}
+.chip{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;white-space:nowrap;font-weight:700;background:var(--info-bg);color:var(--fg)}
+.chip.given{background:var(--ok-bg);color:var(--ok)}.chip.pending,.chip.sending,.chip.warn{background:var(--warn-bg);color:var(--warn)}
+.chip.overdue{background:var(--bad-bg);color:var(--bad)}.chip.skipped,.chip.voided{background:var(--line);color:var(--muted)}
+.chip.pending_confirm{background:var(--conf-bg);color:var(--conf)}
+.alert{border-radius:12px;padding:10px 12px;font-size:14px;border:1px solid}
+.alert.warn{background:var(--warn-bg);border-color:var(--warn-line);color:var(--warn)}
+.alert.bad{background:var(--bad-bg);border-color:var(--bad-line);color:var(--bad)}
+.alert.info{background:var(--info-bg);border-color:var(--info-line);color:var(--fg)}
+.alert strong{display:block;margin-bottom:2px}.alert .btn{margin-top:8px}
+.med{font-size:16px;font-weight:700;color:var(--navy);overflow-wrap:anywhere}
+.dose{font-family:var(--display);font-size:20px;font-weight:700;line-height:1.15}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;font-size:14px;margin:6px 0 0}.kv dt{color:var(--muted)}.kv dd{margin:0;text-align:right;min-width:0;overflow-wrap:anywhere}
+.slot{display:grid;grid-template-columns:70px 1fr auto;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.slot:first-child{border-top:0}.slot .t{font-family:var(--display);font-size:28px;font-weight:700;color:var(--navy)}.slot .m{font-weight:700;line-height:1.2}
+.hi{border-top:1px solid var(--line);padding:10px 0;cursor:pointer}.hi .row{gap:8px}.hi b{min-width:0;overflow-wrap:anywhere}.hi:first-child{border-top:0}
+.tabbar{position:fixed;left:0;right:0;bottom:0;background:var(--tab-bg);padding:8px max(8px,env(safe-area-inset-right,0px)) calc(8px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px));z-index:20}
+.tabs{display:flex;max-width:560px;margin:0 auto;gap:4px}
+.tab{flex:1;background:transparent;border:0;color:var(--tab-fg);padding:10px 2px;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer}
+.tab.on{background:var(--tab-on-bg);color:var(--tab-on-fg)}
+label.f{display:grid;gap:5px;font-size:13px;color:var(--muted);font-weight:700}
+.input{width:100%;min-height:46px;border:1.5px solid var(--line);background:var(--surface);border-radius:12px;padding:8px 12px;font-size:16px;color:var(--fg)}
+textarea.input{min-height:84px;resize:vertical}
+.sbg{position:fixed;inset:0;background:rgba(10,20,34,.6);z-index:40;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--bg);width:100%;max-width:560px;max-height:94%;overflow-y:auto;border-radius:24px 24px 0 0;padding:18px max(16px,env(safe-area-inset-left,0px)) calc(18px + env(safe-area-inset-bottom,0px));display:grid;gap:12px;align-content:start}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:var(--line);padding:4px;border-radius:14px}
+.seg button{border:0;background:transparent;min-height:44px;font-size:15px;border-radius:11px;font-weight:700;cursor:pointer;color:var(--fg)}
+.seg button.on{background:var(--btn-bg);color:var(--btn-fg)}
+.x{border:0;background:transparent;font-size:22px;width:44px;height:44px;cursor:pointer;color:var(--navy)}
+.sw{display:flex;align-items:center;justify-content:space-between;gap:10px}.sw input{width:26px;height:26px;accent-color:#e0bd7c}
+.trow{display:flex;gap:8px;align-items:center}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(96px + env(safe-area-inset-bottom,0px));background:#16283f;color:#fff;padding:12px 18px;border-radius:14px;z-index:60;max-width:92vw;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.empty{text-align:center;padding:28px 8px}
+@media (prefers-reduced-motion:no-preference){.btn:active:not(:disabled){transform:translateY(1px)}}
+.login{position:fixed;inset:0;z-index:100;background:var(--bg);display:none;align-items:center;justify-content:center;padding:24px}
+.login.on{display:flex}.login .box{max-width:360px;width:100%;display:grid;gap:14px;text-align:center}
+.login h1{font-family:var(--display);color:var(--navy);font-size:34px}
+</style>
+
+<div class="login" id="login"><div class="box"></div></div>
+<div class="wrap" id="app"><div class="pad muted" style="padding-block:40px">Cargando…</div></div>
+<div id="sheet"></div><div id="toast"></div>
+
+<script>window.__fbReady=new Promise(r=>{window.__fbResolve=r});</script>
+<script type="module">
+import {initializeApp} from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js';
+import {getAuth,onAuthStateChanged,signInWithPopup,GoogleAuthProvider,signOut} from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js';
+import {initializeFirestore,persistentLocalCache,persistentMultipleTabManager,collection,doc,getDoc,setDoc,updateDoc,onSnapshot,query,limit,runTransaction,writeBatch} from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js';
+const CFG={"apiKey": "AIzaSyAlgef82pfKCdNr6ubDvcXkDcAeMzO5YL8", "authDomain": "aris-med.firebaseapp.com", "projectId": "aris-med", "storageBucket": "aris-med.firebasestorage.app", "messagingSenderId": "3423496126", "appId": "1:3423496126:web:d7fb9f44d75c2faf1d3bef"};
+const SEED={"meds": {"apiretal": {"active": true, "days": 3, "dose": "2,8 ml", "freq": "Cada 6 horas, según receta", "intervalH": 6, "mode": "manual", "name": "Apiretal", "notes": "Registro independiente de Dalsy. No se alterna automáticamente.", "order": 4, "source": "Receta del 29/10/2026 (datos introducidos por la familia). Verificar con pediatría o farmacia.", "startDate": "2026-10-29", "startTime": null, "strength": "100 mg/ml", "times": [], "verified": false, "verifiedAt": null, "verifiedBy": null, "verifiedNote": ""}, "ultralevura": {"active": true, "days": 10, "dose": "1 sobre", "freq": "Cada 24 horas", "intervalH": 24, "mode": "manual", "name": "Ultra-Levura", "notes": "", "order": 5, "source": "Receta del 29/10/2026 (datos introducidos por la familia). Duración «10 días según receta». Verificar con pediatría o farmacia.", "startDate": "2026-10-29", "startTime": null, "strength": "250 mg", "times": [], "verified": false, "verifiedAt": null, "verifiedBy": null, "verifiedNote": ""}, "bactroban": {"active": true, "days": 7, "dose": "1 aplicación", "freq": "Cada 8 horas", "intervalH": 8, "mode": "scheduled", "name": "Bactroban nasal", "notes": "Horario 22:00 / 06:00 / 14:00 = PROPUESTA pendiente de confirmar con farmacia o pediatría.", "order": 2, "source": "Receta del 29/10/2026 (datos introducidos por la familia). Verificar con pediatría o farmacia.", "startDate": "2026-10-29", "startTime": "22:00", "strength": "20 mg/g", "times": ["06:00", "14:00", "22:00"], "verified": false, "verifiedAt": null, "verifiedBy": null, "verifiedNote": ""}, "dalsy": {"active": true, "days": 3, "dose": "4 ml", "freq": "Cada 8 horas, según receta", "intervalH": 8, "mode": "manual", "name": "Dalsy", "notes": "Registro independiente de Apiretal. No se alterna automáticamente.", "order": 3, "source": "Receta del 29/10/2026 (datos introducidos por la familia). Verificar con pediatría o farmacia.", "startDate": "2026-10-29", "startTime": null, "strength": "40 mg/ml", "times": [], "verified": false, "verifiedAt": null, "verifiedBy": null, "verifiedNote": ""}, "augmentine": {"active": true, "days": 10, "dose": "4 ml", "freq": "Cada 8 horas", "intervalH": 8, "mode": "scheduled", "name": "Augmentine suspensión oral", "notes": "Horario 22:00 / 06:00 / 14:00 = PROPUESTA pendiente de confirmar con farmacia o pediatría (sueño y colegio). No es una pauta validada. El pediatra indicó cada 8 horas.", "order": 1, "source": "Receta del 29/10/2026 (datos introducidos por la familia). Verificar con pediatría o farmacia.", "startDate": "2026-10-29", "startTime": "22:00", "strength": "100 mg/ml + 12,5 mg/ml", "times": ["06:00", "14:00", "22:00"], "verified": false, "verifiedAt": null, "verifiedBy": null, "verifiedNote": ""}}, "logs": {"dalsy_inicial": {"approx": null, "at": "2026-10-29T14:30:00.000Z", "byId": "inicial", "confirmed": true, "createdAt": "2026-10-29T19:00:00.000Z", "dose": "4 ml", "hist": [{"at": "2026-10-29T19:00:00.000Z", "by": "inicial", "reason": "Dato inicial aportado por la familia", "type": "create"}], "medId": "dalsy", "notes": "Última toma conocida aportada por la familia al preparar el registro (15:30). Verificar.", "recById": "inicial", "slot": null, "status": "given", "updatedAt": "2026-10-29T19:00:00.000Z", "version": 1}, "apiretal_inicial": {"approx": "2026-10-29", "at": null, "byId": "inicial", "confirmed": false, "createdAt": "2026-10-29T19:00:01.000Z", "dose": "2,8 ml", "hist": [{"at": "2026-10-29T19:00:01.000Z", "by": "inicial", "reason": "Dato inicial aportado por la familia", "type": "create"}], "medId": "apiretal", "notes": "Administrado el 29/10/2026 pero falta confirmar la hora exacta. Corrígelo con la hora real.", "recById": "inicial", "slot": null, "status": "pending_confirm", "version": 1}}, "members": {"inicial": {"nick": "Dato inicial familiar"}, "carlos": {"nick": "Carlos"}, "mireia": {"nick": "Mireia"}}, "config": {"home": {"child": "Aris", "weight": 19}}};
+const ALLOWED={'charly.valero@gmail.com':'carlos','mireia.sastre79@gmail.com':'mireia'};
+const app=initializeApp(CFG),auth=getAuth(app);
+const fs=initializeFirestore(app,{localCache:persistentLocalCache({tabManager:persistentMultipleTabManager()})});
+const box=document.querySelector('#login .box'),lg=document.getElementById('login');
+const show=h=>{box.innerHTML=h;lg.classList.add('on')};
+const wrapDoc=s=>({id:s.id,exists:s.exists(),data:()=>s.data(),metadata:s.metadata});
+function mkDb(){return{
+  collection:n=>{let q=collection(fs,n);const o={limit:k=>{q=query(q,limit(k));return o},onSnapshot:(cb,er)=>onSnapshot(q,{includeMetadataChanges:true},cb,er)};return o},
+  doc:p=>{const r=doc(fs,p);return{
+    get:async()=>wrapDoc(await getDoc(r)),set:d=>setDoc(r,d),update:d=>updateDoc(r,d),
+    onSnapshot:(cb,er)=>onSnapshot(r,{includeMetadataChanges:true},s=>cb(wrapDoc(s)),er),
+    acquire:async()=>({acquired:true})}},
+  runTx:(p,fn)=>{const r=doc(fs,p);return runTransaction(fs,async t=>{const s=await t.get(r);const o=fn(s.exists()?s.data():null);if(o.write)t.set(r,o.write);return o.res})}
+}}
+const dl={save:async({filename,data})=>{const u=URL.createObjectURL(new Blob([data],{type:'text/csv;charset=utf-8'}));const a=document.createElement('a');a.href=u;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);return{status:'saved'}}};
+async function seedIfEmpty(){
+  const s=await getDoc(doc(fs,'config/home'));if(s.exists())return;
+  const b=writeBatch(fs);
+  for(const [col,docs] of Object.entries(SEED))for(const [id,d] of Object.entries(docs))b.set(doc(fs,col+'/'+id),d);
+  await b.commit()}
+const out=()=>signOut(auth);
+function loginView(msg){show('<h1>Aris Med</h1><div class="muted">Registro familiar de medicación.<br>Entra con tu cuenta de Google.</div>'+(msg?'<div class="alert bad">'+msg+'</div>':'')+'<button class="btn" id="gl">Entrar con Google</button>');
+  document.getElementById('gl').onclick=async()=>{try{await signInWithPopup(auth,new GoogleAuthProvider())}catch(e){if(e.code!=='auth/popup-closed-by-user'&&e.code!=='auth/cancelled-popup-request')loginView('No se pudo iniciar sesión ('+(e.code||'error')+').')}}}
+function errView(t,m){show('<h1>Aris Med</h1><div class="alert bad"><strong>'+t+'</strong>'+m+'</div><button class="btn ghost" id="so">Salir</button>');document.getElementById('so').onclick=out}
+onAuthStateChanged(auth,async u=>{
+  if(!u){loginView();return}
+  const email=(u.email||'').toLowerCase(),key=ALLOWED[email];
+  if(!key||!u.emailVerified){errView('Esta cuenta no tiene acceso',email);return}
+  try{await seedIfEmpty()}catch(e){errView('No se pudo preparar la base de datos',e.code||'error');return}
+  lg.classList.remove('on');
+  const db=mkDb();
+  window.__aris={signOut:out,email};
+  window.claude={use:async n=>n==='db'?db:n==='user'?{id:async()=>key,can:async()=>true}:n==='downloads'?dl:null};
+  window.__fbResolve()});
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+<script>
+'use strict';
+const TZ='Europe/Madrid', MIN=60000, HOUR=3600000;
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* ───────── Horarios (lógica pura; no calcula dosis) ───────── */
+function offMs(utc,tz){const p={};for(const x of new Intl.DateTimeFormat('en-US',{timeZone:tz,hourCycle:'h23',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'}).formatToParts(new Date(utc)))if(x.type!=='literal')p[x.type]=+x.value;return Date.UTC(p.year,p.month-1,p.day,p.hour,p.minute,p.second)-Math.floor(utc/1000)*1000}
+function zdate(ds,ts){const[y,m,d]=ds.split('-').map(Number),[h,mi]=ts.split(':').map(Number),g=Date.UTC(y,m-1,d,h,mi);let u=g-offMs(g,TZ);const o2=offMs(u,TZ);if(o2!==g-u)u=g-o2;return new Date(u)}
+const lDate=d=>new Intl.DateTimeFormat('en-CA',{timeZone:TZ,year:'numeric',month:'2-digit',day:'2-digit'}).format(d);
+const lTime=d=>new Intl.DateTimeFormat('es-ES',{timeZone:TZ,hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(d);
+function addDays(ds,n){const[y,m,d]=ds.split('-').map(Number);return new Date(Date.UTC(y,m-1,d+n)).toISOString().slice(0,10)}
+function fmtDT(x){if(!x)return'—';const d=x instanceof Date?x:new Date(x),ds=lDate(d),t=lTime(d);if(ds===lDate(new Date()))return'hoy '+t;if(ds===lDate(new Date(Date.now()-864e5)))return'ayer '+t;const[y,m,dd]=ds.split('-');return`${dd}/${m}/${y.slice(2)} ${t}`}
+const fmtLong=d=>new Intl.DateTimeFormat('es-ES',{timeZone:TZ,weekday:'long',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(d);
+function fmtDur(min){const a=Math.abs(Math.round(min)),h=Math.floor(a/60),m=a%60;return h===0?`${m} min`:m===0?`${h} h`:`${h} h ${m} min`}
+const mStart=m=>zdate(m.startDate,m.startTime||'00:00');
+const mEnd=m=>m.days?zdate(addDays(m.startDate,m.days),m.startTime||'00:00'):null;
+function slotsBetween(m,from,to){
+  if(m.mode!=='scheduled'||!m.active||!(m.times||[]).length)return[];
+  const st=mStart(m),en=mEnd(m),out=[];let day=addDays(lDate(from),-1);const last=addDays(lDate(to),1);
+  for(let g=0;day<=last&&g<400;g++,day=addDays(day,1))for(const t of[...m.times].sort()){const s=zdate(day,t);if(s<st||(en&&s>=en)||s<from||s>to)continue;out.push(s)}
+  return out.sort((a,b)=>a-b)}
+function gaps(times){const ts=[...(times||[])].sort();if(!ts.length)return[];if(ts.length===1)return[{from:ts[0],to:ts[0],hours:24}];const mi=ts.map(t=>+t.slice(0,2)*60+ +t.slice(3,5));return ts.map((t,i)=>{const n=(i+1)%ts.length;let d=mi[n]-mi[i];if(d<=0)d+=1440;return{from:t,to:ts[n],hours:d/60}})}
+function gapWarn(m){const e=+m.intervalH;if(!e)return[];return gaps(m.times).filter(g=>Math.abs(g.hours-e)>1/60).map(g=>({...g,expected:e}))}
+function tDays(m,now){const st=mStart(m),en=mEnd(m),total=m.days||null;if(now<st)return{state:'not_started',total};if(en&&now>=en)return{state:'finished',total};const[y1,m1,d1]=m.startDate.split('-').map(Number),[y2,m2,d2]=lDate(now).split('-').map(Number);return{state:'running',total,day:Math.round((Date.UTC(y2,m2-1,d2)-Date.UTC(y1,m1-1,d1))/864e5)+1}}
+function chkInt(prev,cur,h,tol=15){if(!prev||!h)return{level:'none'};const min=Math.round((cur-prev)/MIN),exp=Math.round(h*60),diff=min-exp;return{level:Math.abs(diff)<=tol?'ok':diff<0?'early':'late',min,exp,diff}}
+
+/* ───────── Estado ───────── */
+const S={meds:[],logs:[],inc:[],members:{},cfg:{child:'Aris',weight:19},me:null,canWrite:null,tab:'home',now:new Date(),ready:{},err:null,fHist:{from:'',to:'',med:'',st:''}};
+let db=null,dl=null,SH=null,rq=0,nickAsked=false;
+const eff=l=>l._pending?'sending':l.status;
+const nick=id=>(S.members[id]&&S.members[id].nick)||'Alguien';
+const medById=id=>S.meds.find(m=>m.id===id);
+const medName=id=>(medById(id)||{}).name||'—';
+const mTitle=m=>m.strength?`${m.name} · ${m.strength}`:m.name;
+const logsMap=()=>{const o={};for(const l of S.logs)o[l.id]=l;return o};
+const rw=()=>S.canWrite!==false;
+const people=()=>Object.keys(S.members).filter(id=>id!=='inicial');
+const LBL={given:'Administrada',skipped:'Omitida',pending_confirm:'Pendiente de confirmar',sending:'Enviando…',pending:'Toca ahora',overdue:'Retrasada',upcoming:'Prevista',voided:'Anulada'};
+const chip=s=>`<span class="chip ${s}">${LBL[s]||s}</span>`;
+const IK={vomit:'Vómito tras la toma',refusal:'Rechazo de la toma',missed:'Dosis no administrada',reaction:'Reacción / síntoma',other:'Otra'};
+function lastGiven(medId,before){return S.logs.filter(l=>l.medId===medId&&l.status==='given'&&!l._pending&&l.at&&(!before||new Date(l.at)<before)).sort((a,b)=>new Date(b.at)-new Date(a.at))[0]}
+function logTime(l){if(l.at)return fmtDT(l.at)+(l.confirmed===false?' (hora sin confirmar)':'');if(l.approx){const[y,m,d]=l.approx.split('-');return`${d}/${m}/${y.slice(2)} · hora sin confirmar`}return'—'}
+const isRolling=m=>m.mode==='scheduled'&&m.rolling!==false&&+m.intervalH>0;
+function anchorOf(m){return S.logs.filter(l=>l.medId===m.id&&l.status==='given'&&!l._pending&&l.at).sort((a,b)=>new Date(b.at)-new Date(a.at))[0]}
+/* Plan de tomas: con reajuste, la siguiente toma = hora real de la última administrada + intervalo de la receta. Una omitida registrada no desplaza ni se recupera. */
+function plan(m,from,to,lm){
+  if(m.mode!=='scheduled'||!m.active)return[];
+  const live=l=>l&&l.status!=='voided'?l:undefined,an=isRolling(m)?anchorOf(m):null;
+  if(!an)return slotsBetween(m,from,to).map(s=>({s,lg:live(lm[m.id+'_'+s.getTime()]),proj:false}));
+  const out=[],iv=+m.intervalH*HOUR,en=mEnd(m);
+  for(const l of S.logs)if(l.medId===m.id&&l.slot&&l.status!=='voided'){const s=new Date(l.slot);if(s>=from&&s<=to)out.push({s,lg:l,proj:false})}
+  let t=new Date(an.at).getTime()+iv;
+  for(let g=0;g<200;g++,t+=iv){if(en&&t>=en)break;if(live(lm[m.id+'_'+t]))continue;if(t<=+to)out.push({s:new Date(t),lg:undefined,proj:true});break}
+  return out.sort((a,b)=>a.s-b.s)}
+function autoSlot(medId){const m=medById(medId);if(!m||!isRolling(m))return null;const x=plan(m,new Date(Date.now()-24*HOUR),new Date(Date.now()+14*HOUR),logsMap()).find(y=>!y.lg&&Math.abs(y.s-Date.now())<=3*HOUR);return x?x.s.getTime():null}
+function slotState(log,slot,now){if(log)return eff(log);if(now<slot)return'upcoming';return now-slot>30*MIN?'overdue':'pending'}
+
+function toast(msg){const t=$('#toast');t.innerHTML=`<div class="toast" role="status">${esc(msg)}</div>`;clearTimeout(toast.h);toast.h=setTimeout(()=>t.innerHTML='',4200)}
+function rr(){if(rq)return;rq=requestAnimationFrame(()=>{rq=0;render()})}
+
+/* ───────── Vistas ───────── */
+function render(){
+  const ae=document.activeElement;
+  if(db&&ae&&$('#app').contains(ae)&&(ae.tagName==='TEXTAREA'||(ae.tagName==='INPUT'&&/^(text|search|number|tel|email)$/.test(ae.type||'text'))))return;
+  const app=$('#app');
+  if(!db){app.innerHTML=`<div class="pad page"><h1 style="font-family:var(--display);color:var(--navy)">Aris Med</h1><div class="alert bad"><strong>Sin base de datos compartida</strong>Esta vista no puede guardar ni sincronizar. Ábrela desde claude.ai con tu sesión iniciada. Mientras tanto no se registra ni se muestra ninguna toma.</div></div>`;return}
+  const body=S.tab==='home'?vHome():S.tab==='hist'?vHist():vSet();
+  app.innerHTML=`<div class="disc pad">Herramienta de registro. No sustituye al pediatra.</div>${body}
+  <nav class="tabbar" aria-label="Secciones"><div class="tabs">${[['home','Inicio'],['hist','Historial'],['set','Ajustes']].map(([k,l])=>`<button class="tab ${S.tab===k?'on':''}" data-act="tab" data-v="${k}">${l}</button>`).join('')}</div></nav>`;
+  if(!nickAsked&&S.ready.members&&S.me&&rw()&&!S.members[S.me]&&!SH){nickAsked=true;openNick()}
+}
+
+function vHome(){
+  const now=S.now,active=S.meds.filter(m=>m.active),lm=logsMap();
+  const slots=[];for(const m of active)for(const x of plan(m,new Date(now-12*HOUR),new Date(+now+14*HOUR),lm))slots.push({m,s:x.s,lg:x.lg,proj:x.proj,st:slotState(x.lg,x.s,now)});
+  slots.sort((a,b)=>a.s-b.s);
+  const sending=S.logs.filter(l=>l._pending),pc=S.logs.filter(l=>l.status==='pending_confirm'),due=slots.filter(x=>x.st==='pending'||x.st==='overdue');
+  const unv=active.filter(m=>!m.verified),ended=active.filter(m=>tDays(m,now).state==='finished');
+  const al=[];
+  if(S.err)al.push(`<div class="alert bad"><strong>Error de sincronización</strong>${esc(S.err)}</div>`);
+  if(!rw())al.push(`<div class="alert warn"><strong>Solo lectura</strong>Quien creó esta página debe compartírtela como Colaborador (Contributor).</div>`);
+  if(sending.length)al.push(`<div class="alert warn"><strong>${sending.length} registro(s) sin confirmar</strong>No cuentan como administrados hasta que el servidor los confirme.</div>`);
+  if(pc.length)al.push(`<div class="alert warn"><strong>Hora por confirmar</strong>${pc.map(l=>`<div>${esc(medName(l.medId))}: ${esc(logTime(l))}</div>`).join('')}<button class="btn sm gold" data-act="tab" data-v="hist">Corregir</button></div>`);
+  if(due.length)al.push(`<div class="alert bad"><strong>Sin registrar</strong>${due.map(x=>`<div>${esc(x.m.name)} · ${lTime(x.s)}</div>`).join('')}Regístralas como administradas u omitidas.</div>`);
+  ended.forEach(m=>al.push(`<div class="alert info"><strong>${esc(m.name)}: duración cumplida</strong>No continúes sin consultar al pediatra.</div>`));
+  if(unv.length)al.push(`<div class="alert info"><strong>Pautas sin verificar</strong>Confírmalas con pediatría o farmacia (Ajustes → Pautas).</div>`);
+  const online=navigator.onLine!==false;
+  const meds=active.map(m=>{
+    const dueS=due.find(x=>x.m.id===m.id),nx=dueS||plan(m,now,new Date(+now+24*HOUR),lm).find(x=>!x.lg),td=tDays(m,now),lg=lastGiven(m.id),la=lg?new Date(lg.at):null,pcl=S.logs.find(l=>l.medId===m.id&&l.status==='pending_confirm');
+    const byI=m.mode==='manual'&&la&&m.intervalH?new Date(+la+m.intervalH*HOUR):null;
+    const nxt=nx?`<dt>Próxima</dt><dd>${esc(fmtDT(nx.s))}${dueS?' · <b style="color:var(--bad)">retrasada</b>':''}</dd>`:byI?`<dt>No antes de</dt><dd>${fmtDT(byI)}</dd>`:'';
+    return`<div class="card"><div class="med">${esc(m.name)}</div>
+    <div><span class="dose">${esc(m.dose)}</span> <span class="muted">· ${esc(m.freq.replace(', según receta',''))}</span></div>
+    <dl class="kv"><dt>Última toma</dt><dd>${lg?esc(fmtDT(lg.at)+' · '+nick(lg.byId)):pcl?'hora por confirmar':'sin registros'}</dd>${nxt}<dt>Día</dt><dd>${td.state==='not_started'?'empieza '+m.startDate.split('-').reverse().join('/'):td.state==='finished'?'cumplido':td.day+(td.total?' de '+td.total:'')}</dd></dl>
+    ${rw()?`<button class="btn ${dueS?'gold':''}" style="margin-top:10px" data-act="reg" data-med="${esc(m.id)}"${nx&&nx.s?` data-slot="${nx.s.getTime()}"`:''}>Registrar toma</button>`:''}</div>`}).join('');
+  return`<header class="hero pad"><div class="kick">Medicación de</div><h1>${esc(S.cfg.child)}</h1><div class="clock">${esc(fmtLong(now))}</div>
+  <div class="sync"><span class="dot ${S.err?'err':online?'':'off'}"></span>${S.err?'Error de sincronización':online?'Sincronizado':'Sin conexión'}</div></header>
+  <div class="pad page">${al.join('')}${meds||(S.ready.meds?'<div class="card empty"><b>Aún no hay medicación cargada.</b><div class="muted">Añádela en Ajustes → Pautas.</div></div>':'<div class="muted">Cargando…</div>')}</div>`}
+
+function vHist(){
+  const f=S.fHist,rows=S.logs.filter(l=>{if(f.med&&l.medId!==f.med)return false;if(f.st&&l.status!==f.st)return false;const d=l.at?lDate(new Date(l.at)):l.approx||'';return(!f.from||d>=f.from)&&(!f.to||d<=f.to)}).sort((a,b)=>new Date(b.at||b.approx||b.createdAt)-new Date(a.at||a.approx||a.createdAt));
+  const inc=S.inc.filter(i=>{if(f.med&&i.medId!==f.med)return false;const d=lDate(new Date(i.at));return(!f.from||d>=f.from)&&(!f.to||d<=f.to)}).sort((a,b)=>new Date(b.at)-new Date(a.at));
+  return`<div class="pad page" style="padding-top:20px"><h2 style="font-family:var(--display);font-size:24px;color:var(--navy)">Historial</h2>
+  <div class="card stack"><div class="row"><label class="f" style="flex:1">Desde<input class="input" type="date" id="hf-from" value="${f.from}"></label><label class="f" style="flex:1">Hasta<input class="input" type="date" id="hf-to" value="${f.to}"></label></div>
+  <label class="f">Medicamento<select class="input" id="hf-med"><option value="">Todos</option>${S.meds.map(m=>`<option value="${esc(m.id)}" ${f.med===m.id?'selected':''}>${esc(m.name)}</option>`).join('')}</select></label>
+  <label class="f">Estado<select class="input" id="hf-st">${[['','Todos'],['given','Administrada'],['skipped','Omitida'],['pending_confirm','Pendiente de confirmar'],['voided','Anulada']].map(([v,l])=>`<option value="${v}" ${f.st===v?'selected':''}>${l}</option>`).join('')}</select></label>
+  <button class="btn ghost sm" data-act="csv">Exportar CSV</button></div>
+  <div class="card"><div class="muted" style="margin-bottom:6px">${rows.length} registro(s)</div>${rows.map(l=>`<div class="hi" data-act="logd" data-id="${esc(l.id)}"><div class="row between"><b>${esc(medName(l.medId))} · ${esc(l.dose)}</b>${chip(eff(l))}</div><div class="muted">${esc(logTime(l))} · ${esc(nick(l.byId))}${l.slot?' · previsto '+lTime(new Date(l.slot)):''}</div>${l.notes?`<div class="muted">“${esc(l.notes)}”</div>`:''}${(l.version||1)>1?`<div class="muted">Corregido (v${l.version})</div>`:''}</div>`).join('')||'<div class="muted">Sin registros con estos filtros.</div>'}</div>
+  <div class="row between"><div class="st">Incidencias</div>${rw()?'<button class="btn sm gold" data-act="incnew">+ Añadir</button>':''}</div>
+  <div class="card">${inc.map(i=>`<div class="hi" style="cursor:default"><div class="row between"><b>${IK[i.kind]||i.kind}</b><span class="muted">${esc(fmtDT(i.at))}</span></div><div class="muted">${i.medId?esc(medName(i.medId))+' · ':''}${esc(nick(i.byId))}${i.desc?' — '+esc(i.desc):''}</div></div>`).join('')||'<div class="muted">Sin incidencias.</div>'}</div></div>`}
+
+function vMeds(){
+  return`<div class="st" style="margin-top:10px">Pautas</div>
+  <div class="alert info">Datos de la receta del 29/10/2026 introducidos por la familia: <b>verifícalos con pediatría o farmacia</b>. La app no calcula ni cambia dosis (peso informado: ${esc(S.cfg.weight??'—')} kg, solo informativo).</div>
+  ${S.meds.map(m=>{const td=tDays(m,S.now),en=mEnd(m),gw=gapWarn(m);return`<div class="card" style="${m.active?'':'opacity:.6'}"><div class="row between"><div class="med">${esc(mTitle(m))}</div><span class="chip ${m.verified?'given':'warn'}">${m.verified?'verificada':'sin verificar'}</span></div>
+  <dl class="kv"><dt>Dosis</dt><dd>${esc(m.dose)}</dd><dt>Frecuencia</dt><dd>${esc(m.freq)}</dd><dt>Horario</dt><dd>${m.mode==='scheduled'?([...m.times].sort().join(' · ')+(isRolling(m)?' (se reajusta)':'')):'manual'}</dd><dt>Inicio</dt><dd>${m.startDate.split('-').reverse().join('/')}${m.startTime?' '+m.startTime.slice(0,5):''}</dd><dt>Duración</dt><dd>${m.days?m.days+' días':'—'}</dd></dl>
+  ${gw.map(g=>`<div class="alert warn" style="margin-top:8px">${g.from} → ${g.to}: ${fmtDur(g.hours*60)} (pauta: ${fmtDur(g.expected*60)})</div>`).join('')}
+  ${m.notes?`<div class="muted" style="margin-top:6px">${esc(m.notes)}</div>`:''}
+  ${rw()?`<button class="btn ghost sm" style="margin-top:10px;width:100%" data-act="medit" data-id="${esc(m.id)}">Editar / verificar</button>`:''}</div>`}).join('')||'<div class="card empty muted">Sin medicación cargada.</div>'}
+  ${rw()?'<button class="btn ghost" data-act="mnew">+ Añadir medicamento</button>':''}`}
+
+function vSet(){
+  return`<div class="pad page" style="padding-top:16px"><h2 style="font-family:var(--display);font-size:24px;color:var(--navy)">Ajustes</h2>
+  <div class="card stack"><h2>Tu nombre</h2><input class="input" id="s-nick" value="${esc(S.members[S.me]?S.members[S.me].nick:'')}" maxlength="30" aria-label="Tu nombre">${rw()?'<button class="btn sm" data-act="savenick">Guardar</button>':''}</div>
+  ${vMeds()}
+  <div class="st">Otros</div>
+  <div class="card stack"><h2>Niña</h2><label class="f">Nombre<input class="input" id="s-child" value="${esc(S.cfg.child)}"></label><label class="f">Peso (kg), solo informativo<input class="input" id="s-w" inputmode="decimal" value="${esc(S.cfg.weight??'')}"></label>${rw()?'<button class="btn sm" data-act="savecfg">Guardar</button>':''}</div>
+  <div class="card stack"><h2>Compartir</h2><div class="muted">Personas: ${people().map(id=>esc(nick(id))).join(' · ')||'—'}.<br>Quien creó la página: <b>Compartir</b> → nivel <b>Colaborador (Contributor)</b> para la otra persona.</div></div>
+  <div class="alert warn">Sin notificaciones con la app cerrada. Para una hora concreta, pon también una alarma en el móvil.</div>
+  <button class="btn ghost sm" style="width:100%" data-act="logout">Cerrar sesión (${esc(window.__aris?window.__aris.email:'')})</button><div class="muted" style="text-align:center">Aris Med · no sustituye al pediatra.</div></div>`}
+
+/* ───────── Hojas (formularios) ───────── */
+function sheet(html){const old=$('#sheet .sheet'),y=old?old.scrollTop:0;$('#sheet').innerHTML=`<div class="sbg" data-bg="1"><div class="sheet" role="dialog" aria-modal="true">${html}</div></div>`;document.body.style.overflow='hidden';const n=$('#sheet .sheet');if(n)n.scrollTop=y}
+function closeSheet(){$('#sheet').innerHTML='';document.body.style.overflow='';SH=null;rr()}
+const head=(t)=>`<div class="row between"><h2>${t}</h2><button class="x" data-act="close" aria-label="Cerrar">✕</button></div>`;
+const opt=(v,l,sel)=>`<option value="${esc(v)}" ${sel?'selected':''}>${esc(l)}</option>`;
+const nowInput=()=>`${lDate(new Date())}T${lTime(new Date())}`;
+const fromInput=v=>{if(!v||v.indexOf('T')<0)return new Date(NaN);const[d,t]=v.split('T');return zdate(d,t)};
+
+function openNick(){SH={kind:'nick',nick:''};drawNick()}
+function drawNick(){sheet(`${head('¿Cómo te llamas?')}<div class="muted">Este nombre aparecerá en las tomas que registres (por ejemplo «Carlos» o «Mireia»).</div><input class="input" data-f="nick" id="nk" maxlength="30" value="${esc(SH.nick)}" placeholder="Tu nombre"><button class="btn" data-act="nicksave" ${SH.nick.trim()?'':'disabled'}>Guardar</button>`)}
+
+function openReg(medId,slotMs){SH={kind:'reg',medId,slotMs:slotMs||autoSlot(medId),status:'given',when:nowInput(),by:S.members[S.me]?S.me:people()[0]||S.me,notes:'',step:'form',force:false,busy:false,res:null};drawReg()}
+function regCalc(){
+  const m=medById(SH.medId),actual=fromInput(SH.when),slot=SH.slotMs?new Date(SH.slotMs):null,lm=logsMap();
+  const sl=slot?lm[m.id+'_'+SH.slotMs]:null,taken=sl&&sl.status!=='voided'?sl:null;
+  const pv=lastGiven(m.id,actual),pa=pv?new Date(pv.at):null,ic=chkInt(pa,actual,m.intervalH),dev=slot?Math.round((actual-slot)/MIN):0,w=[];
+  if(!m.verified)w.push('La pauta y el horario de este medicamento aún no están verificados con pediatría o farmacia.');
+  if(SH.status==='given'&&ic.level==='early')w.push(`Han pasado ${fmtDur(ic.min)} desde la toma anterior (${fmtDT(pa)}); la pauta indica ${fmtDur(ic.exp)}. Faltan ${fmtDur(-ic.diff)}.`);
+  if(SH.status==='given'&&ic.level==='late')w.push(`Han pasado ${fmtDur(ic.min)} desde la toma anterior; la pauta indica ${fmtDur(ic.exp)}. No se compensa ni se duplica la siguiente dosis.`);
+  if(slot&&Math.abs(dev)>30)w.push(`La hora real se aleja ${fmtDur(dev)} ${dev>0?'después':'antes'} del horario previsto (${lTime(slot)}).`);
+  if(actual>new Date(Date.now()+5*MIN))w.push('La hora indicada está en el futuro.');
+  const ok=!taken&&!(SH.status==='skipped'&&!SH.notes.trim())&&actual<=new Date(Date.now()+5*MIN)&&!!SH.by&&rw();
+  return{m,actual,slot,taken,w,ok}}
+function drawReg(){
+  const c=regCalc(),{m}=c;
+  if(SH.res){const r=SH.res;sheet(`${head('No se ha registrado')}${r.code==='exists'?`<div class="alert bad"><strong>Esta toma ya estaba registrada</strong>${esc(nick(r.log.byId))} la registró ${esc(fmtDT(r.log.at))}. No se ha duplicado.</div>`:r.code==='busy'?'<div class="alert warn"><strong>Otra persona está registrando esta toma ahora mismo</strong>Espera unos segundos y mira el historial antes de volver a intentarlo.</div>':r.code==='dup'?`<div class="alert warn"><strong>Posible duplicado</strong>Ya hay una toma de ${esc(m.name)} registrada por ${esc(nick(r.log.byId))} ${esc(fmtDT(r.log.at))}. ¿Es otra toma distinta?</div><button class="btn gold" data-act="regforce">Sí, registrar igualmente</button>`:`<div class="alert bad">No se pudo registrar${r.msg?': '+esc(r.msg):''}.</div>`}<button class="btn ghost" data-act="close">Cerrar</button>`);return}
+  if(SH.step==='confirm'){sheet(`${head('Confirmar registro')}<div class="card"><div class="med">${esc(mTitle(m))}</div><div class="dose">${esc(m.dose)}</div><dl class="kv"><dt>Estado</dt><dd>${SH.status==='given'?'Administrada':'NO administrada (omitida)'}</dd><dt>Hora real</dt><dd>${esc(fmtDT(c.actual))}</dd>${c.slot?`<dt>Horario previsto</dt><dd>${lTime(c.slot)}</dd>`:''}<dt>Persona</dt><dd>${esc(nick(SH.by))}</dd>${SH.notes.trim()?`<dt>Observaciones</dt><dd>${esc(SH.notes.trim())}</dd>`:''}</dl></div>${c.w.map(x=>`<div class="alert warn">${esc(x)}</div>`).join('')}<div class="muted">Constará como «Administrada» solo cuando el servidor confirme el registro.</div><button class="btn gold" data-act="regsend" ${SH.busy?'disabled':''}>${SH.busy?'Enviando…':SH.status==='given'?'Confirmar: la he administrado':'Confirmar: no administrada'}</button><button class="btn ghost" data-act="regback" ${SH.busy?'disabled':''}>Volver y editar</button>`);return}
+  const slots=plan(m,new Date(Date.now()-24*HOUR),new Date(Date.now()+14*HOUR),logsMap()).filter(x=>!x.lg||x.s.getTime()===SH.slotMs).map(x=>x.s);
+  sheet(`${head('Registrar toma')}<label class="f">Medicamento<select class="input" data-f="medId" data-redraw="1">${S.meds.filter(x=>x.active).map(x=>opt(x.id,x.name,x.id===SH.medId)).join('')}</select></label>
+  <div class="muted">Dosis de la pauta: <b class="dose" style="font-size:18px">${esc(m.dose)}</b> · ${esc(m.freq)}${m.verified?'':' · sin verificar'}</div>
+  <div class="seg"><button class="${SH.status==='given'?'on':''}" data-act="st" data-v="given">Administrada</button><button class="${SH.status==='skipped'?'on':''}" data-act="st" data-v="skipped">No administrada</button></div>
+  ${m.mode==='scheduled'?`<label class="f">Horario previsto<select class="input" data-f="slotMs" data-redraw="1"><option value="">Sin horario previsto</option>${slots.map(s=>opt(s.getTime(),fmtDT(s),s.getTime()===SH.slotMs)).join('')}</select></label>`:''}
+  ${c.taken?`<div class="alert bad"><strong>Esta toma ya está registrada</strong>${esc(nick(c.taken.byId))} · ${esc(fmtDT(c.taken.at))}</div>`:''}
+  <label class="f">Hora real de administración<input class="input" type="datetime-local" data-f="when" data-redraw="1" value="${SH.when}"></label>
+  <label class="f">Quién la administra<select class="input" data-f="by">${people().map(id=>opt(id,nick(id),id===SH.by)).join('')}</select></label>
+  <label class="f">Nota ${SH.status==='skipped'?'(obligatoria: motivo)':'(opcional)'}<textarea class="input" style="min-height:60px" data-f="notes" data-redraw="1">${esc(SH.notes)}</textarea></label>
+  ${c.w.map(x=>`<div class="alert warn">${esc(x)}</div>`).join('')}<div class="muted">Consta como «Administrada» solo cuando el servidor lo confirme.</div><button class="btn gold" data-act="regsend" ${c.ok&&!SH.busy?'':'disabled'}>${SH.busy?'Enviando…':SH.status==='given'?'Confirmar: la he administrado':'Confirmar: no administrada'}</button>`)}
+
+async function claimSet(path,body){
+  if(db.runTx)return db.runTx(path,d=>{
+    if(d&&d.status&&d.status!=='voided')return{res:{ok:false,code:'exists',log:d}};
+    const b={...body};
+    if(d&&d.status==='voided'){b.version=(d.version||1)+1;b.hist=(d.hist||[]).concat(body.hist)}
+    return{write:b,res:{ok:true}}});
+  const ref=db.doc(path),a=await ref.acquire({holder:S.me||('t'+Math.random().toString(36).slice(2)),ttlMs:10000});
+  if(!a.acquired)return{ok:false,code:'busy'};
+  const s=await ref.get(),d=s.exists?s.data():null;
+  if(d&&d.status&&d.status!=='voided')return{ok:false,code:'exists',log:d};
+  if(d&&d.status==='voided'){body.version=(d.version||1)+1;body.hist=(d.hist||[]).concat(body.hist)}
+  await ref.set(body);return{ok:true}}
+async function mutateLog(id,ver,fn){
+  if(db.runTx)return db.runTx('logs/'+id,d=>{
+    if(!d)return{res:{ok:false,code:'missing'}};
+    if((d.version||1)!==ver)return{res:{ok:false,code:'version_conflict'}};
+    if(d.status==='voided')return{res:{ok:false,code:'voided'}};
+    return{write:fn(d),res:{ok:true}}});
+  const ref=db.doc('logs/'+id),a=await ref.acquire({holder:S.me||'t',ttlMs:10000});
+  if(!a.acquired)return{ok:false,code:'busy'};
+  const s=await ref.get();if(!s.exists)return{ok:false,code:'missing'};const d=s.data();
+  if((d.version||1)!==ver)return{ok:false,code:'version_conflict'};if(d.status==='voided')return{ok:false,code:'voided'};
+  await ref.set(fn(d));return{ok:true}}
+const errMsg=e=>(e&&(e.code||e.message))||'error';
+
+async function regSend(){
+  const c=regCalc(),{m}=c;SH.busy=true;drawReg();
+  const nowI=new Date().toISOString();
+  const body={medId:m.id,slot:c.slot?c.slot.toISOString():null,at:c.actual.toISOString(),approx:null,status:SH.status,confirmed:true,dose:m.dose,notes:SH.notes.trim()||'',byId:SH.by,recById:S.me,version:1,createdAt:nowI,updatedAt:nowI,hist:[{at:nowI,by:S.me,type:'create'}]};
+  try{
+    let r;
+    if(c.slot)r=await claimSet('logs/'+m.id+'_'+SH.slotMs,body);
+    else{
+      const dup=SH.status==='given'&&!SH.force?S.logs.find(l=>l.medId===m.id&&l.status==='given'&&l.at&&Math.abs(new Date(l.at)-c.actual)<10*MIN):null;
+      if(dup)r={ok:false,code:'dup',log:dup};else{await db.doc('logs/'+m.id+'_m'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)).set(body);r={ok:true}}}
+    SH.busy=false;
+    if(r.ok){closeSheet();toast(SH.status==='given'?'Toma enviada. Consta como administrada al confirmarla el servidor.':'Omisión enviada.');return}
+    SH.res=r;drawReg()
+  }catch(e){SH.busy=false;SH.res={ok:false,code:'error',msg:errMsg(e)};drawReg()}}
+
+function openLog(id){const l=S.logs.find(x=>x.id===id);if(!l)return;SH={kind:'log',id,edit:false,when:l.at?`${lDate(new Date(l.at))}T${lTime(new Date(l.at))}`:`${l.approx||lDate(new Date())}T12:00`,dose:l.dose,notes:l.notes||'',status:l.status==='voided'?'given':l.status,confirmed:l.confirmed!==false&&l.status!=='pending_confirm',reason:'',err:null,busy:false};drawLog()}
+function drawLog(){
+  const l=S.logs.find(x=>x.id===SH.id);if(!l){closeSheet();return}const m=medById(l.medId);
+  const h=(l.hist||[]).slice().reverse().map(x=>{const lbl={create:'Registro creado',correct:'Corrección',void:'Anulado'}[x.type]||x.type;return`<div class="hi" style="cursor:default"><b>${lbl}</b> <span class="muted">· ${esc(nick(x.by))} · ${esc(fmtDT(x.at))}</span>${x.reason?`<div class="muted">Motivo: ${esc(x.reason)}</div>`:''}${x.old?`<div class="muted">Antes: ${x.old.at?esc(fmtDT(x.old.at)):'hora sin confirmar'} · ${LBL[x.old.status]||x.old.status} · ${esc(x.old.dose||'')}${x.old.notes?' · “'+esc(x.old.notes)+'”':''}</div>`:''}</div>`}).join('');
+  sheet(`${head(esc(m?mTitle(m):'Registro'))}<div class="card">${chip(eff(l))}<dl class="kv"><dt>Dosis</dt><dd>${esc(l.dose)}</dd><dt>Hora real</dt><dd>${esc(logTime(l))}</dd><dt>Previsto</dt><dd>${l.slot?esc(fmtDT(l.slot)):'sin horario'}</dd><dt>Administrada por</dt><dd>${esc(nick(l.byId))}</dd><dt>Registrada por</dt><dd>${esc(nick(l.recById))}</dd><dt>Observaciones</dt><dd>${esc(l.notes||'—')}</dd></dl></div>
+  ${l.status!=='voided'&&rw()&&!SH.edit?'<button class="btn" data-act="logedit">Corregir / confirmar hora</button>':''}
+  ${SH.edit?`<div class="seg"><button class="${SH.status!=='skipped'?'on':''}" data-act="lst" data-v="given">Administrada</button><button class="${SH.status==='skipped'?'on':''}" data-act="lst" data-v="skipped">Omitida</button></div>
+  <label class="f">Hora real<input class="input" type="datetime-local" data-f="when" value="${SH.when}"></label>
+  ${l.status==='pending_confirm'?`<label class="sw"><span>Confirmo que esta es la hora exacta</span><input type="checkbox" data-f="confirmed" ${SH.confirmed?'checked':''}></label>`:''}
+  <label class="f">Dosis<input class="input" data-f="dose" value="${esc(SH.dose)}"></label><label class="f">Observaciones<textarea class="input" data-f="notes">${esc(SH.notes)}</textarea></label>
+  <label class="f">Motivo de la corrección (obligatorio)<input class="input" data-f="reason" value="${esc(SH.reason)}"></label>${SH.err?`<div class="alert bad">${esc(SH.err)}</div>`:''}
+  <button class="btn gold" data-act="logsave" ${SH.busy?'disabled':''}>Guardar corrección</button><button class="btn danger" data-act="logvoid" ${SH.busy?'disabled':''}>Anular este registro</button>`:''}
+  <div class="st">Historial de modificaciones</div><div class="card">${h||'<div class="muted">Sin modificaciones.</div>'}</div>`)}
+const LERR={busy:'Otra persona está editando este registro. Inténtalo en unos segundos.',version_conflict:'Otra persona modificó este registro mientras lo editabas. Se ha recargado; revisa y vuelve a intentarlo.',voided:'Este registro ya estaba anulado.',missing:'El registro ya no existe.',reason:'Indica el motivo.'};
+async function logSave(void_){
+  const l=S.logs.find(x=>x.id===SH.id);if(!SH.reason.trim()){SH.err=LERR.reason;drawLog();return}
+  SH.busy=true;SH.err=null;drawLog();const nowI=new Date().toISOString(),stat=SH.status==='pending_confirm'&&!SH.confirmed?'pending_confirm':SH.status;
+  try{
+    const r=await mutateLog(l.id,l.version||1,d=>{const old={at:d.at,status:d.status,dose:d.dose,notes:d.notes,confirmed:d.confirmed};const nd={...d,version:(d.version||1)+1,updatedAt:nowI};
+      if(void_){nd.status='voided'}else{nd.status=stat;nd.at=stat==='pending_confirm'?null:fromInput(SH.when).toISOString();nd.confirmed=stat==='pending_confirm'?false:true;nd.dose=SH.dose.trim()||d.dose;nd.notes=SH.notes.trim()}
+      nd.hist=(d.hist||[]).concat([{at:nowI,by:S.me,type:void_?'void':'correct',reason:SH.reason.trim(),old}]);return nd});
+    SH.busy=false;if(r.ok){closeSheet();toast(void_?'Registro anulado (se conserva en el historial).':'Corrección guardada. El historial conserva la versión anterior.');return}
+    SH.err=LERR[r.code]||('No se pudo guardar ('+r.code+').');drawLog()
+  }catch(e){SH.busy=false;SH.err='No se pudo guardar: '+errMsg(e);drawLog()}}
+
+function openInc(){SH={kind:'inc',k:'vomit',med:'',desc:'',when:nowInput(),err:null};drawInc()}
+function drawInc(){sheet(`${head('Registrar incidencia')}<label class="f">Tipo<select class="input" data-f="k">${Object.entries(IK).map(([k,v])=>opt(k,v,k===SH.k)).join('')}</select></label><label class="f">Medicamento (opcional)<select class="input" data-f="med"><option value="">—</option>${S.meds.map(m=>opt(m.id,m.name,m.id===SH.med)).join('')}</select></label><label class="f">Cuándo<input class="input" type="datetime-local" data-f="when" value="${SH.when}"></label><label class="f">Descripción<textarea class="input" data-f="desc">${esc(SH.desc)}</textarea></label><div class="muted">Una incidencia no cambia ninguna pauta. Ante dudas o síntomas, consulta con el pediatra.</div>${SH.err?`<div class="alert bad">${esc(SH.err)}</div>`:''}<button class="btn" data-act="incsave">Guardar</button>`)}
+
+const EMPTY_MED={name:'',strength:'',dose:'',freq:'',intervalH:'',days:'',mode:'manual',times:[],startDate:lDate(new Date()),startTime:'',notes:'',rolling:true};
+function openMed(id){const m=id?medById(id):null;SH={kind:'med',id:id||null,f:m?{name:m.name,strength:m.strength||'',dose:m.dose,freq:m.freq,intervalH:m.intervalH??'',days:m.days??'',mode:m.mode,times:[...(m.times||[])].sort(),startDate:m.startDate,startTime:(m.startTime||'').slice(0,5),notes:m.notes||'',rolling:m.rolling!==false}:{...EMPTY_MED,times:[]},vnote:'',err:null,busy:false};drawMed()}
+function drawMed(){
+  const f=SH.f,m=SH.id?medById(SH.id):null,gw=gapWarn({times:f.times,intervalH:+String(f.intervalH).replace(',','.')||null}),gp=gaps(f.times);
+  sheet(`${head(m?'Editar '+esc(m.name):'Nuevo medicamento')}
+  <label class="f">Nombre<input class="input" data-m="name" value="${esc(f.name)}"></label><label class="f">Concentración<input class="input" data-m="strength" value="${esc(f.strength)}"></label>
+  <label class="f">Dosis que figura en la pauta<input class="input" data-m="dose" value="${esc(f.dose)}"></label><label class="f">Frecuencia (texto de la receta)<input class="input" data-m="freq" value="${esc(f.freq)}"></label>
+  <div class="row"><label class="f" style="flex:1">Intervalo (horas)<input class="input" inputmode="decimal" data-m="intervalH" value="${esc(f.intervalH)}"></label><label class="f" style="flex:1">Duración (días)<input class="input" inputmode="numeric" data-m="days" value="${esc(f.days)}"></label></div>
+  <div class="row"><label class="f" style="flex:1">Fecha de inicio<input class="input" type="date" data-m="startDate" value="${f.startDate}"></label><label class="f" style="flex:1">Hora 1.ª toma<input class="input" type="time" data-m="startTime" value="${f.startTime}"></label></div>
+  <div class="muted">La duración cuenta desde el inicio y no se prolonga sola.</div>
+  <div class="seg"><button class="${f.mode==='scheduled'?'on':''}" data-act="mmode" data-v="scheduled">Horario fijo</button><button class="${f.mode==='manual'?'on':''}" data-act="mmode" data-v="manual">Registro manual</button></div>
+  ${f.mode==='scheduled'?`<div class="stack"><label class="sw"><span><b>Reajustar el horario según la última toma</b><br><span class="muted">La siguiente toma sale sumando el intervalo de la receta (${esc(f.intervalH||'?')} h) a la hora real de la última administrada. No duplica ni recupera dosis omitidas.</span></span><input type="checkbox" data-m="rolling" ${f.rolling?'checked':''}></label><div class="muted">Horas de toma (propuesta pendiente de confirmar). Se usan para la primera toma y si desactivas el reajuste.</div>${f.times.map((t,i)=>`<div class="trow"><input class="input" type="time" data-ti="${i}" value="${t}"><button class="x" data-act="mtdel" data-i="${i}" aria-label="Quitar hora">✕</button></div>`).join('')}<button class="btn ghost sm" data-act="mtadd">+ Añadir hora</button>${gp.length?`<div class="muted">Intervalos entre horas: ${gp.map(g=>`${g.from}→${g.to} ${fmtDur(g.hours*60)}`).join(' · ')}</div>`:''}${gw.map(g=>`<div class="alert warn">${g.from} → ${g.to} son ${fmtDur(g.hours*60)}; la pauta indica ${fmtDur(g.expected*60)}.</div>`).join('')}</div>`:''}
+  <label class="f">Notas<textarea class="input" data-m="notes">${esc(f.notes)}</textarea></label>${SH.err?`<div class="alert bad">${esc(SH.err)}</div>`:''}
+  <button class="btn" data-act="msave" ${SH.busy||!f.name.trim()||!f.dose.trim()?'disabled':''}>Guardar cambios</button>
+  ${m?`<div class="card stack"><h2>Verificación con el profesional</h2><div class="muted">${m.verified?'Verificada'+(m.verifiedAt?' el '+esc(fmtDT(m.verifiedAt)):'')+(m.verifiedNote?' · '+esc(m.verifiedNote):'')+'.':'Sin verificar. Guardar cambios en la pauta o el horario retira la verificación.'}</div>${m.verified?'<button class="btn ghost" data-act="mver" data-v="0">Retirar verificación</button>':`<label class="f">Quién/cómo se verificó (p. ej. «farmacia, 30/10»)<input class="input" data-f="vnote" value="${esc(SH.vnote)}"></label><button class="btn gold" data-act="mver" data-v="1" ${SH.vnote.trim()?'':'disabled'}>Confirmo: pauta y horario verificados</button>`}</div><button class="btn ghost" data-act="mactive">${m.active?'Desactivar medicamento (se conserva el historial)':'Reactivar medicamento'}</button>`:''}`)}
+async function medSave(){
+  const f=SH.f,old=SH.id?medById(SH.id):null,iv=String(f.intervalH).replace(',','.').trim(),data={name:f.name.trim(),strength:f.strength.trim(),dose:f.dose.trim(),freq:f.freq.trim(),intervalH:iv?+iv:null,days:f.days?+f.days:null,mode:f.mode,times:f.mode==='scheduled'?[...new Set(f.times.filter(Boolean))].sort():[],startDate:f.startDate,startTime:f.startTime||null,notes:f.notes.trim(),rolling:f.rolling!==false};
+  SH.busy=true;SH.err=null;drawMed();
+  try{
+    if(old){const nz=v=>(v===''||v===undefined)?null:v;
+      const chg=['name','strength','dose','freq','intervalH','days','mode','startDate','startTime'].some(k=>nz(old[k])!==nz(data[k]))||JSON.stringify(old.times||[])!==JSON.stringify(data.times);
+      if(chg&&old.verified){data.verified=false;data.verifiedAt=null;data.verifiedBy=null;data.verifiedNote=''}
+      await db.doc('meds/'+old.id).update(data)}
+    else{const id='med'+Date.now().toString(36);await db.doc('meds/'+id).set({...data,source:'Añadido por la familia',verified:false,active:true,order:S.meds.length+1})}
+    closeSheet();toast(old&&old.verified?'Guardado. La pauta queda «sin verificar» si cambió.':'Guardado.')
+  }catch(e){SH.busy=false;SH.err='No se pudo guardar: '+errMsg(e);drawMed()}}
+
+function csv(){
+  const q=v=>{const s=String(v??'');return/[";\n]/.test(s)?`"${s.replace(/"/g,'""')}"`:s};
+  const rows=[['Fecha','Hora','Medicamento','Dosis','Estado','Hora confirmada','Horario previsto','Administrada por','Observaciones','Versión']];
+  for(const l of S.logs.slice().sort((a,b)=>new Date(a.at||a.approx)-new Date(b.at||b.approx)))rows.push([l.at?lDate(new Date(l.at)):l.approx||'',l.at?lTime(new Date(l.at)):'',medName(l.medId),l.dose,LBL[l.status]||l.status,l.confirmed===false?'no':'sí',l.slot?lTime(new Date(l.slot)):'',nick(l.byId),l.notes||'',l.version||1]);
+  for(const i of S.inc)rows.push([lDate(new Date(i.at)),lTime(new Date(i.at)),i.medId?medName(i.medId):'','','INCIDENCIA: '+(IK[i.kind]||i.kind),'','',nick(i.byId),i.desc||'','']);
+  return'﻿'+rows.map(r=>r.map(q).join(';')).join('\n')}
+
+/* ───────── Eventos ───────── */
+const A={
+  tab:t=>{S.tab=t.dataset.v;window.scrollTo(0,0);rr()},
+  reg:t=>openReg(t.dataset.med,t.dataset.slot?+t.dataset.slot:null),
+  logd:t=>openLog(t.dataset.id),
+  close:()=>closeSheet(),
+  st:t=>{SH.status=t.dataset.v;drawReg()},
+  regnext:()=>{SH.step='confirm';drawReg()},regback:()=>{SH.step='form';drawReg()},regsend:()=>regSend(),
+  regforce:()=>{SH.force=true;SH.res=null;SH.step='confirm';regSend()},
+  logedit:()=>{SH.edit=true;drawLog()},lst:t=>{SH.status=t.dataset.v;drawLog()},logsave:()=>logSave(false),logvoid:()=>logSave(true),
+  incnew:()=>openInc(),
+  incsave:async()=>{try{await db.doc('inc/i'+Date.now().toString(36)+Math.random().toString(36).slice(2,5)).set({medId:SH.med||null,kind:SH.k,desc:SH.desc.trim(),at:fromInput(SH.when).toISOString(),byId:S.me,createdAt:new Date().toISOString()});closeSheet();toast('Incidencia registrada')}catch(e){SH.err='No se pudo guardar: '+errMsg(e);drawInc()}},
+  medit:t=>openMed(t.dataset.id),mnew:()=>openMed(null),
+  mmode:t=>{SH.f.mode=t.dataset.v;if(t.dataset.v==='scheduled'&&!SH.f.times.length)SH.f.times=['08:00'];drawMed()},
+  mtadd:()=>{SH.f.times.push('08:00');drawMed()},mtdel:t=>{SH.f.times.splice(+t.dataset.i,1);drawMed()},msave:()=>medSave(),
+  mver:async t=>{try{const on=t.dataset.v==='1';await db.doc('meds/'+SH.id).update(on?{verified:true,verifiedNote:SH.vnote.trim(),verifiedAt:new Date().toISOString(),verifiedBy:S.me}:{verified:false,verifiedNote:'',verifiedAt:null,verifiedBy:null});closeSheet();toast(on?'Marcada como verificada con el profesional.':'Verificación retirada.')}catch(e){SH.err=errMsg(e);drawMed()}},
+  mactive:async()=>{const m=medById(SH.id);try{await db.doc('meds/'+m.id).update({active:!m.active});closeSheet()}catch(e){SH.err=errMsg(e);drawMed()}},
+  nicksave:async()=>{try{await db.doc('members/'+S.me).set({nick:SH.nick.trim()});closeSheet();toast('Nombre guardado')}catch(e){toast('No se pudo guardar: '+errMsg(e))}},
+  savenick:async()=>{const v=($('#s-nick').value||'').trim();if(!v)return;try{await db.doc('members/'+S.me).set({nick:v});toast('Nombre guardado')}catch(e){toast('No se pudo guardar: '+errMsg(e))}},
+  savecfg:async()=>{const w=($('#s-w').value||'').replace(',','.').trim();try{await db.doc('config/home').set({child:($('#s-child').value||'Aris').trim()||'Aris',weight:w?+w:null});toast('Guardado')}catch(e){toast('No se pudo guardar: '+errMsg(e))}},
+  logout:()=>{if(window.__aris)window.__aris.signOut().then(()=>location.reload())},
+  csv:async()=>{if(!dl){toast('La descarga no está disponible en esta vista.');return}try{await dl.save({filename:`aris-med-historial-${lDate(new Date())}.csv`,data:csv()});toast('Historial exportado')}catch(e){if(e&&e.code!=='declined')toast('No se pudo exportar ('+errMsg(e)+')')}}
+};
+document.addEventListener('click',e=>{
+  if(e.target.dataset&&e.target.dataset.bg){closeSheet();return}
+  const t=e.target.closest('[data-act]');if(t&&A[t.dataset.act]&&!t.disabled)A[t.dataset.act](t)});
+function setField(t){
+  if(t.dataset.ti!==undefined&&SH&&SH.kind==='med'){SH.f.times[+t.dataset.ti]=t.value;return false}
+  if(t.dataset.m&&SH&&SH.kind==='med'){SH.f[t.dataset.m]=t.type==='checkbox'?t.checked:t.value;return false}
+  if(t.dataset.f&&SH){const v=t.type==='checkbox'?t.checked:t.dataset.f==='slotMs'?(t.value?+t.value:null):t.value;SH[t.dataset.f]=v;return true}
+  return false}
+function syncBtns(){if(!SH)return;const d=(sel,v)=>{const b=document.querySelector(sel);if(b)b.disabled=!!v};try{
+  if(SH.kind==='nick')d('[data-act="nicksave"]',!SH.nick.trim());
+  else if(SH.kind==='reg'&&SH.step==='form')d('[data-act="regsend"]',!regCalc().ok);
+  else if(SH.kind==='med'){d('[data-act="msave"]',SH.busy||!SH.f.name.trim()||!SH.f.dose.trim());d('[data-act="mver"][data-v="1"]',!(SH.vnote||'').trim())}}catch(_){}}
+document.addEventListener('input',e=>{const t=e.target;
+  if(t.id&&t.id.startsWith('hf-')){const k={'hf-from':'from','hf-to':'to','hf-med':'med','hf-st':'st'}[t.id];S.fHist[k]=t.value;rr();return}
+  if(t.tagName==='SELECT')return;
+  if(SH){setField(t);syncBtns()}
+  else if(SH&&SH.kind==='med'&&(t.dataset.m==='intervalH'||t.dataset.ti!==undefined)){/* sin redibujar mientras se escribe */}});
+document.addEventListener('change',e=>{const t=e.target;
+  if(t.id&&t.id.startsWith('hf-'))return;
+  const re=setField(t);if(!SH)return;
+  if(SH.kind==='reg'&&re){if(t.dataset.f==='medId')SH.slotMs=autoSlot(SH.medId);drawReg()}
+  else if(SH.kind==='med'&&(t.dataset.ti!==undefined||t.dataset.m==='intervalH'))drawMed();
+  else if(SH.kind==='log'&&t.dataset.f==='confirmed'){SH.status=SH.confirmed?'given':'pending_confirm';drawLog()}});
+
+/* ───────── Arranque ───────── */
+const dsnap=d=>({id:d.id,...d.data(),_pending:d.metadata.hasPendingWrites});
+function onErr(e){S.err=e&&e.code==='revoked'?'El acceso a esta página se ha retirado.':'No se pudo leer la base de datos ('+errMsg(e)+').';rr()}
+async function boot(){
+  try{
+    await (window.__fbReady||Promise.resolve());db=await window.claude.use('db');const user=await window.claude.use('user');dl=await window.claude.use('downloads');
+    if(!db){render();return}
+    S.me=user?await user.id():null;S.canWrite=user?await user.can('data.write'):null;
+    db.collection('meds').onSnapshot(s=>{S.meds=s.docs.map(dsnap).filter(m=>m.name).sort((a,b)=>(a.order||0)-(b.order||0));S.ready.meds=true;rr()},onErr);
+    db.collection('logs').limit(1000).onSnapshot(s=>{S.logs=s.docs.map(dsnap).filter(l=>l.status&&l.medId);S.ready.logs=true;rr()},onErr);
+    db.collection('inc').limit(500).onSnapshot(s=>{S.inc=s.docs.map(dsnap).filter(i=>i.kind);rr()},onErr);
+    db.collection('members').onSnapshot(s=>{const o={};for(const d of s.docs)if(d.data().nick)o[d.id]=d.data();S.members=o;S.ready.members=true;rr()},onErr);
+    db.doc('config/home').onSnapshot(s=>{if(s.exists)S.cfg={child:s.data().child||'Aris',weight:s.data().weight??null};rr()},onErr);
+    setInterval(()=>{S.now=new Date();rr()},20000);
+    window.addEventListener('online',rr);window.addEventListener('offline',rr);
+  }catch(e){db=null}
+  render()}
+render();boot();
+</script>
+
+</body></html>
