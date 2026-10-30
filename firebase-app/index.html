@@ -125,6 +125,8 @@ const ADJ={adjust:['2026-10-30T21:45:00.000Z','2026-10-31T05:30:00.000Z','2026-1
 async function applyAdjust(){const r=doc(fs,'meds/augmentine'),s=await getDoc(r);if(s.exists()&&!('adjust' in s.data()))await updateDoc(r,ADJ)}
 const COND='Solo si hay fiebre superior a 39 °C (indicado por la familia; verificar con pediatría)';
 async function applyCond(){for(const id of ['dalsy','apiretal']){const r=doc(fs,'meds/'+id),s=await getDoc(r);if(s.exists()&&!('condition' in s.data()))await updateDoc(r,{condition:COND})}}
+async function applyOrder(){const u=doc(fs,'meds/ultralevura'),s=await getDoc(u);if(!s.exists()||s.data().orderSet)return;
+  const b=writeBatch(fs);b.update(u,{order:3,orderSet:true});b.update(doc(fs,'meds/dalsy'),{order:4});b.update(doc(fs,'meds/apiretal'),{order:5});await b.commit()}
 const out=()=>signOut(auth);
 function loginView(msg){show('<h1>Aris Med</h1><div class="muted">Registro familiar de medicación.<br>Entra con tu cuenta de Google.</div>'+(msg?'<div class="alert bad">'+msg+'</div>':'')+'<button class="btn" id="gl">Entrar con Google</button>');
   document.getElementById('gl').onclick=async()=>{try{await signInWithPopup(auth,new GoogleAuthProvider())}catch(e){if(e.code!=='auth/popup-closed-by-user'&&e.code!=='auth/cancelled-popup-request')loginView('No se pudo iniciar sesión ('+(e.code||'error')+').')}}}
@@ -133,7 +135,7 @@ onAuthStateChanged(auth,async u=>{
   if(!u){loginView();return}
   const email=(u.email||'').toLowerCase(),key=ALLOWED[email];
   if(!key||!u.emailVerified){errView('Esta cuenta no tiene acceso',email);return}
-  try{await seedIfEmpty();await applyAdjust();await applyCond()}catch(e){errView('No se pudo preparar la base de datos',e.code||'error');return}
+  try{await seedIfEmpty();await applyAdjust();await applyCond();await applyOrder()}catch(e){errView('No se pudo preparar la base de datos',e.code||'error');return}
   lg.classList.remove('on');
   const db=mkDb();
   window.__aris={signOut:out,email};
