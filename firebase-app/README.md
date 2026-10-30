@@ -7,3 +7,4 @@ Web estática (sin compilar) con Firestore + acceso con Google. Se publica en Gi
 - Las reglas impiden borrar tomas; solo se corrigen o anulan (versión +1, con historial).
 - No envía notificaciones con la app cerrada (requeriría Cloud Functions / plan Blaze). Usa una alarma del móvil para las horas concretas.
 - La versión anterior con Supabase sigue en `src/` y `supabase/` (no se usa).
+
