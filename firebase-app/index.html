@@ -121,6 +121,8 @@ async function seedIfEmpty(){
   const b=writeBatch(fs);
   for(const [col,docs] of Object.entries(SEED))for(const [id,d] of Object.entries(docs))b.set(doc(fs,col+'/'+id),d);
   await b.commit()}
+const ADJ={adjust:['2026-10-30T21:45:00.000Z','2026-10-31T05:30:00.000Z','2026-10-31T13:15:00.000Z','2026-10-31T21:00:00.000Z'],adjustNote:'Ajuste acordado con farmacia/pediatría (confirmado por la familia): intervalos de 7 h 45 min desde la última toma real (30/10 a las 15:00) hasta volver a 22:00 / 06:00 / 14:00. Nunca se muestra una toma con menos de 7 h 45 min desde la anterior.'};
+async function applyAdjust(){const r=doc(fs,'meds/augmentine'),s=await getDoc(r);if(s.exists()&&!('adjust' in s.data()))await updateDoc(r,ADJ)}
 const out=()=>signOut(auth);
 function loginView(msg){show('<h1>Aris Med</h1><div class="muted">Registro familiar de medicación.<br>Entra con tu cuenta de Google.</div>'+(msg?'<div class="alert bad">'+msg+'</div>':'')+'<button class="btn" id="gl">Entrar con Google</button>');
   document.getElementById('gl').onclick=async()=>{try{await signInWithPopup(auth,new GoogleAuthProvider())}catch(e){if(e.code!=='auth/popup-closed-by-user'&&e.code!=='auth/cancelled-popup-request')loginView('No se pudo iniciar sesión ('+(e.code||'error')+').')}}}
@@ -129,7 +131,7 @@ onAuthStateChanged(auth,async u=>{
   if(!u){loginView();return}
   const email=(u.email||'').toLowerCase(),key=ALLOWED[email];
   if(!key||!u.emailVerified){errView('Esta cuenta no tiene acceso',email);return}
-  try{await seedIfEmpty()}catch(e){errView('No se pudo preparar la base de datos',e.code||'error');return}
+  try{await seedIfEmpty();await applyAdjust()}catch(e){errView('No se pudo preparar la base de datos',e.code||'error');return}
   lg.classList.remove('on');
   const db=mkDb();
   window.__aris={signOut:out,email};
@@ -186,10 +188,14 @@ function anchorOf(m){return S.logs.filter(l=>l.medId===m.id&&l.status==='given'&
 function plan(m,from,to,lm){
   if(m.mode!=='scheduled'||!m.active)return[];
   const live=l=>l&&l.status!=='voided'?l:undefined,an=isRolling(m)?anchorOf(m):null;
+  const adj=(m.adjust||[]).map(x=>+new Date(x)).filter(x=>x>0).sort((a,b)=>a-b);
+  if(!an&&adj.length)return adj.filter(t=>t>=+from&&t<=+to).map(t=>({s:new Date(t),lg:live(lm[m.id+'_'+t]),proj:false}));
   if(!an)return slotsBetween(m,from,to).map(s=>({s,lg:live(lm[m.id+'_'+s.getTime()]),proj:false}));
   const out=[],iv=+m.intervalH*HOUR,en=mEnd(m);
   for(const l of S.logs)if(l.medId===m.id&&l.slot&&l.status!=='voided'){const s=new Date(l.slot);if(s>=from&&s<=to)out.push({s,lg:l,proj:false})}
   let t=new Date(an.at).getTime()+iv;
+  /* Horario de ajuste acordado: la siguiente toma es la primera hora de ajuste posterior a la última administrada, pero nunca con menos de (intervalo − 15 min) desde ella. */
+  const na=adj.find(x=>x>+new Date(an.at));if(na)t=Math.max(na,+new Date(an.at)+iv-15*MIN);
   for(let g=0;g<200;g++,t+=iv){if(en&&t>=en)break;if(live(lm[m.id+'_'+t]))continue;if(t<=+to)out.push({s:new Date(t),lg:undefined,proj:true});break}
   return out.sort((a,b)=>a.s-b.s)}
 function autoSlot(medId){const m=medById(medId);if(!m||!isRolling(m))return null;const x=plan(m,new Date(Date.now()-24*HOUR),new Date(Date.now()+14*HOUR),logsMap()).find(y=>!y.lg&&Math.abs(y.s-Date.now())<=3*HOUR);return x?x.s.getTime():null}
@@ -253,7 +259,7 @@ function vMeds(){
   return`<div class="st" style="margin-top:10px">Pautas</div>
   <div class="alert info">Datos de la receta del 29/10/2026 introducidos por la familia: <b>verifícalos con pediatría o farmacia</b>. La app no calcula ni cambia dosis (peso informado: ${esc(S.cfg.weight??'—')} kg, solo informativo).</div>
   ${S.meds.map(m=>{const td=tDays(m,S.now),en=mEnd(m),gw=gapWarn(m);return`<div class="card" style="${m.active?'':'opacity:.6'}"><div class="row between"><div class="med">${esc(mTitle(m))}</div><span class="chip ${m.verified?'given':'warn'}">${m.verified?'verificada':'sin verificar'}</span></div>
-  <dl class="kv"><dt>Dosis</dt><dd>${esc(m.dose)}</dd><dt>Frecuencia</dt><dd>${esc(m.freq)}</dd><dt>Horario</dt><dd>${m.mode==='scheduled'?([...m.times].sort().join(' · ')+(isRolling(m)?' (se reajusta)':'')):'manual'}</dd><dt>Inicio</dt><dd>${m.startDate.split('-').reverse().join('/')}${m.startTime?' '+m.startTime.slice(0,5):''}</dd><dt>Duración</dt><dd>${m.days?m.days+' días':'—'}</dd></dl>
+  <dl class="kv"><dt>Dosis</dt><dd>${esc(m.dose)}</dd><dt>Frecuencia</dt><dd>${esc(m.freq)}</dd><dt>Horario</dt><dd>${m.mode==='scheduled'?([...m.times].sort().join(' · ')+(isRolling(m)?' (se reajusta)':'')):'manual'}</dd><dt>Inicio</dt><dd>${m.startDate.split('-').reverse().join('/')}${m.startTime?' '+m.startTime.slice(0,5):''}</dd><dt>Duración</dt><dd>${m.days?m.days+' días':'—'}</dd>${(m.adjust||[]).length?`<dt>Ajuste de horario</dt><dd>${m.adjust.map(x=>esc(fmtDT(x))).join(' → ')}</dd>`:''}</dl>${m.adjustNote?`<div class="muted" style="margin-top:6px">${esc(m.adjustNote)}</div>`:''}
   ${gw.map(g=>`<div class="alert warn" style="margin-top:8px">${g.from} → ${g.to}: ${fmtDur(g.hours*60)} (pauta: ${fmtDur(g.expected*60)})</div>`).join('')}
   ${m.notes?`<div class="muted" style="margin-top:6px">${esc(m.notes)}</div>`:''}
   ${rw()?`<button class="btn ghost sm" style="margin-top:10px;width:100%" data-act="medit" data-id="${esc(m.id)}">Editar / verificar</button>`:''}</div>`}).join('')||'<div class="card empty muted">Sin medicación cargada.</div>'}
