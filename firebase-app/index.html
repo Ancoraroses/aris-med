@@ -121,9 +121,8 @@ async function seedIfEmpty(){
   const b=writeBatch(fs);
   for(const [col,docs] of Object.entries(SEED))for(const [id,d] of Object.entries(docs))b.set(doc(fs,col+'/'+id),d);
   await b.commit()}
-const ADJ={adjust:['2026-10-30T21:45:00.000Z','2026-10-31T05:30:00.000Z','2026-10-31T13:15:00.000Z','2026-10-31T21:00:00.000Z'],adjustNote:'Ajuste acordado con farmacia/pediatría (confirmado por la familia): intervalos de 7 h 45 min desde la última toma real (30/10 a las 15:00) hasta volver a 22:00 / 06:00 / 14:00. Nunca se muestra una toma con menos de 7 h 45 min desde la anterior.'};
-async function applyAdjust(){const r=doc(fs,'meds/augmentine'),s=await getDoc(r);if(s.exists()&&!('adjust' in s.data()))await updateDoc(r,ADJ)}
-const COND='Solo si hay fiebre superior a 39 °C (indicado por la familia; verificar con pediatría)';
+const ADJ={adjust:['2026-10-31T13:15:00.000Z','2026-10-31T21:00:00.000Z','2026-11-01T04:30:00.000Z','2026-11-01T12:00:00.000Z','2026-11-01T20:00:00.000Z'],adjustTol:30,adjustV:2,adjustNote:'Ajuste decidido por la familia (31/10): 14:15, 22:00, 05:30, 13:00 y 21:00; después cada 8 h (05:00 / 13:00 / 21:00). Ningún intervalo baja de 7 h 30 min desde la toma real anterior. La farmacia autorizó mover media hora; confirmar si se repite varias veces.'};
+async function applyAdjust(){for(const id of ['augmentine','bactroban']){const r=doc(fs,'meds/'+id),s=await getDoc(r);if(s.exists()&&s.data().adjustV!==2)await updateDoc(r,ADJ)}}
 async function applyCond(){for(const id of ['dalsy','apiretal']){const r=doc(fs,'meds/'+id),s=await getDoc(r);if(s.exists()&&!('condition' in s.data()))await updateDoc(r,{condition:COND})}}
 async function applyOrder(){const u=doc(fs,'meds/ultralevura'),s=await getDoc(u);if(!s.exists()||s.data().orderSet)return;
   const b=writeBatch(fs);b.update(u,{order:3,orderSet:true});b.update(doc(fs,'meds/dalsy'),{order:4});b.update(doc(fs,'meds/apiretal'),{order:5});await b.commit()}
@@ -199,7 +198,7 @@ function plan(m,from,to,lm){
   for(const l of S.logs)if(l.medId===m.id&&l.slot&&l.status!=='voided'){const s=new Date(l.slot);if(s>=from&&s<=to)out.push({s,lg:l,proj:false})}
   let t=new Date(an.at).getTime()+iv;
   /* Horario de ajuste acordado: la siguiente toma es la primera hora de ajuste posterior a la última administrada, pero nunca con menos de (intervalo − 15 min) desde ella. */
-  const na=adj.find(x=>x>+new Date(an.at));if(na)t=Math.max(na,+new Date(an.at)+iv-15*MIN);
+  const na=adj.find(x=>x>+new Date(an.at));if(na)t=Math.max(na,+new Date(an.at)+iv-(+m.adjustTol||15)*MIN);
   for(let g=0;g<200;g++,t+=iv){if(en&&t>=en)break;if(live(lm[m.id+'_'+t]))continue;if(t<=+to)out.push({s:new Date(t),lg:undefined,proj:true});break}
   return out.sort((a,b)=>a.s-b.s)}
 function autoSlot(medId){const m=medById(medId);if(!m||!isRolling(m))return null;const x=plan(m,new Date(Date.now()-24*HOUR),new Date(Date.now()+14*HOUR),logsMap()).find(y=>!y.lg&&Math.abs(y.s-Date.now())<=3*HOUR);return x?x.s.getTime():null}
